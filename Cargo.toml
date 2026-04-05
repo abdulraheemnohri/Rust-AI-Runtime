@@ -1,0 +1,9 @@
+[workspace]
+members = [
+    "rust_ai_runtime/rust_runtime",
+    "rust_ai_runtime/examples/cli_example",
+    "rust_ai_plugins/voice_assistant",
+    "rust_ai_plugins/summarizer",
+    "rust_ai_plugins/analytics",
+    "rust_ai_examples/desktop_cli",
+]
