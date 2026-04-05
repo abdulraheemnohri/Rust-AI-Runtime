@@ -1,0 +1,9 @@
+[package]
+name = "cli_example"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rust_runtime = { path = "../../rust_runtime" }
+env_logger = "0.10"
+log = "0.4"

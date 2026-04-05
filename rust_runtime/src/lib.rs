@@ -1,28 +1,60 @@
+use log::{info, error};
+#[cfg(target_os = "android")]
+use android_logger::Config;
+
 // Minimal Rust AI Runtime Skeleton
 
 #[no_mangle]
 pub extern "C" fn init_runtime() -> bool {
-    // Initialize memory, threads, logging
-    println!("Rust AI Runtime Initialized");
+    #[cfg(target_os = "android")]
+    android_logger::init_once(Config::default().with_max_level(LevelFilter::Info));
+
+    // In other environments, we can optionally use env_logger or simple println
+    info!("Rust AI Runtime Initialized");
     true
 }
 
 #[no_mangle]
-pub extern "C" fn load_model(model_path: *const u8, len: usize) -> bool {
-    let path_str = unsafe { std::str::from_utf8(std::slice::from_raw_parts(model_path, len)).unwrap() };
-    println!("Model loaded: {}", path_str);
-    true
+pub extern "C" fn load_model(model_path_ptr: *const u8, len: usize) -> bool {
+    if model_path_ptr.is_null() {
+        error!("Model path pointer is null");
+        return false;
+    }
+
+    let path_result = unsafe { std::str::from_utf8(std::slice::from_raw_parts(model_path_ptr, len)) };
+    match path_result {
+        Ok(path_str) => {
+            info!("Model loaded: {}", path_str);
+            true
+        },
+        Err(e) => {
+            error!("Failed to parse model path: {}", e);
+            false
+        }
+    }
 }
 
 #[no_mangle]
 pub extern "C" fn run_inference(model_name_ptr: *const u8, model_name_len: usize, input_ptr: *const u8, input_len: usize) -> *mut i8 {
-    let input_str = unsafe { std::str::from_utf8(std::slice::from_raw_parts(input_ptr, input_len)).unwrap() };
-    let model_name = unsafe { std::str::from_utf8(std::slice::from_raw_parts(model_name_ptr, model_name_len)).unwrap_or("model") };
+    if model_name_ptr.is_null() || input_ptr.is_null() {
+        error!("Input pointer is null");
+        return std::ptr::null_mut();
+    }
 
-    println!("Running inference on model: {}, input: {}", model_name, input_str);
+    let model_name_res = unsafe { std::str::from_utf8(std::slice::from_raw_parts(model_name_ptr, model_name_len)) };
+    let input_res = unsafe { std::str::from_utf8(std::slice::from_raw_parts(input_ptr, input_len)) };
 
-    let output = format!("AI Output for {}: {}", model_name, input_str);
-    std::ffi::CString::new(output).unwrap().into_raw()
+    match (model_name_res, input_res) {
+        (Ok(model_name), Ok(input_str)) => {
+            info!("Running inference on model: {}, input: {}", model_name, input_str);
+            let output = format!("AI Output for {}: {}", model_name, input_str);
+            std::ffi::CString::new(output).unwrap().into_raw()
+        },
+        _ => {
+            error!("Failed to parse strings for inference");
+            std::ptr::null_mut()
+        }
+    }
 }
 
 #[cfg(test)]
@@ -38,5 +70,10 @@ mod tests {
     fn test_load_model() {
         let model_path = "sample_model.ggml";
         assert!(load_model(model_path.as_ptr(), model_path.len()));
+    }
+
+    #[test]
+    fn test_load_model_null() {
+        assert!(!load_model(std::ptr::null(), 0));
     }
 }

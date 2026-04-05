@@ -1,6 +1,8 @@
-/target/
-/.idea/
-/*.iml
+target/
+rust_runtime/target/
+examples/cli_example/target/
+.idea/
+*.iml
 *.so
 *.o
 *.a
