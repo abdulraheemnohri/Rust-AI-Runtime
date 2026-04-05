@@ -1,6 +1,4 @@
-target/
-rust_runtime/target/
-examples/cli_example/target/
+**/target/
 .idea/
 *.iml
 *.so
