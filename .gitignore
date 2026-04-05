@@ -1,0 +1,8 @@
+/target/
+/.idea/
+/*.iml
+*.so
+*.o
+*.a
+*.rlib
+.DS_Store
