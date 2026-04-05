@@ -2,7 +2,7 @@
 # Make sure cargo-ndk is installed
 # cargo install cargo-ndk
 
-TARGETS=("arm64-v8a" "armeabi-v7a" "x86_64")
+TARGETS=("aarch64-linux-android" "armv7-linux-androideabi" "x86_64-linux-android")
 for t in "${TARGETS[@]}"; do
     echo "Building for target: $t"
     # Note: In a real environment, you would run something like:

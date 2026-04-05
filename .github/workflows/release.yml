@@ -11,6 +11,9 @@ permissions:
   actions: read
   id-token: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build-and-test:
     name: Build & Test - ${{ matrix.platform.os-name }}
@@ -73,7 +76,7 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: arm64-v8a, armeabi-v7a, x86_64-linux-android
+          targets: aarch64-linux-android, armv7-linux-androideabi, x86_64-linux-android
 
       - name: Install cargo-ndk
         run: cargo install cargo-ndk
