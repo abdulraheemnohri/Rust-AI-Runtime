@@ -13,6 +13,18 @@ A modular, high-performance, offline AI platform built in Rust for Android, desk
 - **Multi-arch Support**: Built for Android (arm64, v7a, x86_64) and desktop.
 - **Open Source**: Licensed under Apache-2.0.
 
+## Releases
+Automated releases are available on the [GitHub Releases](https://github.com/YourUsername/RustAI_Ecosystem/releases) page.
+- **Desktop Libraries**: Pre-built `.so` (Linux), `.dylib` (macOS), and `.dll` (Windows) for the core runtime.
+- **Android Libraries**: Pre-built `jniLibs` for `arm64-v8a`, `armeabi-v7a`, and `x86_64`.
+- **CLI Binaries**: Standalone executables for quick testing.
+
+To trigger a new release, use the publish script:
+```bash
+cd rust_ai_runtime/scripts
+./publish.sh v0.1.0
+```
+
 ## Getting Started
 See the individual module `README.md` files for specific build and usage instructions:
 - [Rust AI Runtime Core](rust_ai_runtime/README.md)

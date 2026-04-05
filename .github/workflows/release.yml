@@ -1,0 +1,109 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: Build - ${{ matrix.platform.os-name }}
+    strategy:
+      matrix:
+        platform:
+          - os-name: Linux-x86_64
+            os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            bin: rust_runtime
+            suffix: .so
+          - os-name: macOS-x86_64
+            os: macos-latest
+            target: x86_64-apple-darwin
+            bin: rust_runtime
+            suffix: .dylib
+          - os-name: Windows-x86_64
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+            bin: rust_runtime
+            suffix: .dll
+
+    runs-on: ${{ matrix.platform.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform.target }}
+
+      - name: Build Core Runtime
+        run: cargo build -p rust_runtime --release --target ${{ matrix.platform.target }}
+
+      - name: Package Artifact
+        shell: bash
+        run: |
+          mkdir dist
+          cp target/${{ matrix.platform.target }}/release/lib${{ matrix.platform.bin }}${{ matrix.platform.suffix }} dist/ || cp target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}${{ matrix.platform.suffix }} dist/
+          cd dist
+          tar -czf ../${{ matrix.platform.os-name }}.tar.gz *
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.platform.os-name }}
+          path: ${{ matrix.platform.os-name }}.tar.gz
+
+  build-android:
+    name: Build - Android
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: arm64-v8a, armeabi-v7a, x86_64-linux-android
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk
+
+      - name: Build Android Multi-Arch
+        run: |
+          cd rust_ai_runtime/scripts
+          chmod +x build_android.sh
+          ./build_android.sh
+
+      - name: Package Android Artifacts
+        run: |
+          cd rust_ai_runtime/examples/android_example/app/src/main/
+          tar -czf ../../../../../../../android-jniLibs.tar.gz jniLibs
+
+      - name: Upload Android Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-jniLibs
+          path: android-jniLibs.tar.gz
+
+  release:
+    name: Create Release
+    needs: [build, build-android]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            Linux-x86_64/Linux-x86_64.tar.gz
+            macOS-x86_64/macOS-x86_64.tar.gz
+            Windows-x86_64/Windows-x86_64.tar.gz
+            android-jniLibs/android-jniLibs.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
