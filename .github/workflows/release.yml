@@ -89,8 +89,8 @@ jobs:
 
       - name: Package Android Artifacts
         run: |
-          cd rust_ai_runtime/examples/android_example/app/src/main/
-          tar -czf ../../../../../../../android-jniLibs.tar.gz jniLibs
+          cd rust_ai_examples/android_project/lib/src/main/
+          tar -czf ../../../../../../android-jniLibs.tar.gz jniLibs
 
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
