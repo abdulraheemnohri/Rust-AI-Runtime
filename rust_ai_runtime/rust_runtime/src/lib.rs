@@ -1,7 +1,6 @@
 use log::{info, error};
-#[cfg(target_os = "android")]
-use android_logger::Config;
 use libloading::{Library, Symbol};
+use std::os::raw::c_char;
 
 // Minimal Rust AI Runtime Skeleton
 
@@ -35,7 +34,7 @@ pub extern "C" fn load_model(model_path_ptr: *const u8, len: usize) -> bool {
 }
 
 #[no_mangle]
-pub extern "C" fn run_inference(model_name_ptr: *const u8, model_name_len: usize, input_ptr: *const u8, input_len: usize) -> *mut i8 {
+pub extern "C" fn run_inference(model_name_ptr: *const u8, model_name_len: usize, input_ptr: *const u8, input_len: usize) -> *mut c_char {
     if model_name_ptr.is_null() || input_ptr.is_null() {
         error!("Input pointer is null");
         return std::ptr::null_mut();
@@ -58,10 +57,10 @@ pub extern "C" fn run_inference(model_name_ptr: *const u8, model_name_len: usize
 }
 
 // Plugin loading functionality
-pub type PluginFunc = unsafe extern "C" fn(*const u8, usize) -> *mut i8;
+pub type PluginFunc = unsafe extern "C" fn(*const u8, usize) -> *mut c_char;
 
 #[no_mangle]
-pub extern "C" fn call_plugin(plugin_path_ptr: *const u8, plugin_path_len: usize, symbol_name_ptr: *const u8, symbol_name_len: usize, input_ptr: *const u8, input_len: usize) -> *mut i8 {
+pub extern "C" fn call_plugin(plugin_path_ptr: *const u8, plugin_path_len: usize, symbol_name_ptr: *const u8, symbol_name_len: usize, input_ptr: *const u8, input_len: usize) -> *mut c_char {
     if plugin_path_ptr.is_null() || symbol_name_ptr.is_null() || input_ptr.is_null() {
         error!("Plugin call pointer is null");
         return std::ptr::null_mut();
