@@ -1,10 +1,10 @@
 # Rust AI Examples
 
-Example applications demonstrating the usage of the Rust AI Ecosystem.
+End-user application examples demonstrating the integration and usage of the RustAI Ecosystem.
 
 ## Examples
-- `android_app/`: Full Android Studio project placeholder.
-- `desktop_cli/`: A standalone Rust CLI demonstrating basic inference.
+- `android_project/`: A comprehensive multi-module Android project (App + Library).
+- `desktop_cli/`: A standalone Rust CLI tool that demonstrates core inference and dynamic plugin loading.
 
 ## Getting Started
-Each example has its own README with specific setup and run instructions.
+Refer to the README within each example directory for specific setup and execution instructions.

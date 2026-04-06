@@ -115,6 +115,7 @@ jobs:
       - name: Publish to GitHub Packages
         run: |
           cd rust_ai_examples/android_project
+          chmod +x gradlew
           ./gradlew :lib:publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
