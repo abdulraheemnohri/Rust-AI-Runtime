@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 permissions:
   contents: write
@@ -15,8 +15,10 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
+
   build-and-test:
     name: Build & Test - ${{ matrix.platform.os-name }}
+
     strategy:
       matrix:
         platform:
@@ -25,11 +27,13 @@ jobs:
             target: x86_64-unknown-linux-gnu
             bin: rust_runtime
             suffix: .so
+
           - os-name: macOS-x86_64
             os: macos-latest
             target: x86_64-apple-darwin
             bin: rust_runtime
             suffix: .dylib
+
           - os-name: Windows-x86_64
             os: windows-latest
             target: x86_64-pc-windows-msvc
@@ -37,7 +41,9 @@ jobs:
             suffix: .dll
 
     runs-on: ${{ matrix.platform.os }}
+
     steps:
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -49,14 +55,15 @@ jobs:
       - name: Run Tests
         run: cargo test --workspace --target ${{ matrix.platform.target }}
 
-      - name: Build Core Runtime
+      - name: Build Runtime
         run: cargo build -p rust_runtime --release --target ${{ matrix.platform.target }}
 
       - name: Package Artifact
         shell: bash
         run: |
           mkdir dist
-          cp target/${{ matrix.platform.target }}/release/lib${{ matrix.platform.bin }}${{ matrix.platform.suffix }} dist/ || cp target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}${{ matrix.platform.suffix }} dist/
+          cp target/${{ matrix.platform.target }}/release/lib${{ matrix.platform.bin }}${{ matrix.platform.suffix }} dist/ || \
+          cp target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}${{ matrix.platform.suffix }} dist/
           cd dist
           tar -czf ../${{ matrix.platform.os-name }}.tar.gz *
 
@@ -66,22 +73,30 @@ jobs:
           name: ${{ matrix.platform.os-name }}
           path: ${{ matrix.platform.os-name }}.tar.gz
 
+
+
   build-android:
-    name: Build - Android
+
+    name: Build Android JNI
     runs-on: ubuntu-latest
+
     steps:
+
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: aarch64-linux-android, armv7-linux-androideabi, x86_64-linux-android
+          targets: |
+            aarch64-linux-android
+            armv7-linux-androideabi
+            x86_64-linux-android
 
       - name: Install cargo-ndk
         run: cargo install cargo-ndk
 
-      - name: Build Android Multi-Arch
+      - name: Build Android Libraries
         run: |
           cd rust_ai_runtime/scripts
           chmod +x build_android.sh
@@ -98,21 +113,26 @@ jobs:
           name: android-jniLibs
           path: android-jniLibs.tar.gz
 
+
+
   publish-android-package:
+
     name: Publish Android Package
-    needs: [build-android]
+    needs: build-android
     runs-on: ubuntu-latest
+
     steps:
+
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK 11
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
-          distribution: 'temurin'
+          java-version: "17"
+          distribution: temurin
 
-      - name: Publish to GitHub Packages
+      - name: Publish Library
         run: |
           cd rust_ai_examples/android_project
           chmod +x gradlew
@@ -120,35 +140,51 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+
+
   provenance:
+
     needs: [build-and-test, build-android]
+
     permissions:
       actions: read
       id-token: write
       contents: write
+
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.4.0
+
     with:
-      base64-subjects: "TODO: Add base64 subjects for artifacts"
+      base64-subjects: "TODO"
       upload-assets: true
 
+
+
   release:
-    name: Create Release
+
+    name: Create GitHub Release
     needs: [build-and-test, build-android, provenance]
     runs-on: ubuntu-latest
+
     steps:
+
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download All Artifacts
+      - name: Download Artifacts
         uses: actions/download-artifact@v4
+        with:
+          path: artifacts
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+      - name: Show Files
+        run: ls -R artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
         with:
           files: |
-            Linux-x86_64/Linux-x86_64.tar.gz
-            macOS-x86_64/macOS-x86_64.tar.gz
-            Windows-x86_64/Windows-x86_64.tar.gz
-            android-jniLibs/android-jniLibs.tar.gz
+            artifacts/Linux-x86_64/Linux-x86_64.tar.gz
+            artifacts/macOS-x86_64/macOS-x86_64.tar.gz
+            artifacts/Windows-x86_64/Windows-x86_64.tar.gz
+            artifacts/android-jniLibs/android-jniLibs.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
