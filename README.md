@@ -3,38 +3,32 @@
 A modular, high-performance, offline AI platform built in Rust for Android, desktop, and potentially web.
 
 ## Project Structure
-- `rust_ai_runtime/`: Core Rust library, Android/CLI examples, and build scripts.
-- `rust_ai_plugins/`: Modular AI plugins (Voice Assistant, Summarizer, Analytics).
-- `rust_ai_examples/`: Example applications demonstrating platform integration.
+- `rust_ai_runtime/`: Core Rust library, internal examples, and build scripts.
+- `rust_ai_plugins/`: Modular AI task plugins (Voice Assistant, Summarizer, Analytics).
+- `rust_ai_examples/`: Production-ready application examples.
 
 ## Key Features
 - **Offline AI Inference**: Run AI models locally on mobile and desktop.
-- **Plugin-ready**: Extend the runtime with specialized AI task plugins.
-- **Multi-arch Support**: Built for Android (arm64, v7a, x86_64) and desktop.
-- **Open Source**: Licensed under Apache-2.0.
+- **Dynamic Plugin System**: Extend the runtime with specialized modules at runtime.
+- **Multi-arch Android Support**: Built for `aarch64`, `armv7`, and `x86_64`.
+- **Security-First**: Integrated SLSA 3 provenance for all build artifacts.
+- **Easy Distribution**: Automated publishing to GitHub Packages.
 
-## Releases
+## Releases & Distribution
 Automated releases are available on the [GitHub Releases](https://github.com/YourUsername/RustAI_Ecosystem/releases) page.
-- **Desktop Libraries**: Pre-built `.so` (Linux), `.dylib` (macOS), and `.dll` (Windows) for the core runtime.
-- **Android Libraries**: Pre-built `jniLibs` for `arm64-v8a`, `armeabi-v7a`, and `x86_64`.
-- **CLI Binaries**: Standalone executables for quick testing.
+- **Desktop Libraries**: Pre-built `.so`, `.dylib`, and `.dll` files.
+- **Android AARs**: Available via GitHub Packages (Maven).
+- **CLI Tools**: Ready-to-run binaries for quick evaluation.
 
-To trigger a new release, use the publish script:
+To trigger a new release, use the provided script:
 ```bash
-cd rust_ai_runtime/scripts
-./publish.sh v0.1.0
+./rust_ai_runtime/scripts/publish.sh v1.0.0
 ```
 
 ## Getting Started
-See the individual module `README.md` files for specific build and usage instructions:
-- [Rust AI Runtime Core](rust_ai_runtime/README.md)
-- [Rust AI Plugins](rust_ai_plugins/README.md)
-- [Example Apps](rust_ai_examples/README.md)
-
-## Support & Monetization
-Support this project through:
-- **GitHub Sponsors**: [Link to sponsors page]
-- **Donations**: [PayPal/Ko-fi link]
+1. **Core Engine**: [rust_ai_runtime/README.md](rust_ai_runtime/README.md)
+2. **Pluggable Tasks**: [rust_ai_plugins/README.md](rust_ai_plugins/README.md)
+3. **App Integration**: [rust_ai_examples/README.md](rust_ai_examples/README.md)
 
 ## License
 Licensed under the Apache License 2.0. See [LICENSE](LICENSE) for details.
